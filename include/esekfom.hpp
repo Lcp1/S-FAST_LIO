@@ -149,7 +149,7 @@ namespace esekfom
 						normvec->points[i].x = pabcd(0); //存储平面的单位法向量  以及当前点到平面距离
 						normvec->points[i].y = pabcd(1);
 						normvec->points[i].z = pabcd(2);
-						normvec->points[i].intensity = pd2;
+						normvec->points[i].intensity = pd2;//用距离表示点的强度信息
 					}
 				}
 			}
@@ -173,17 +173,17 @@ namespace esekfom
 			}
 
 			// 雅可比矩阵H和残差向量的计算
-			ekfom_data.h_x = MatrixXd::Zero(effct_feat_num, 12);
-			ekfom_data.h.resize(effct_feat_num);
+			ekfom_data.h_x = MatrixXd::Zero(effct_feat_num, 12);//点数对应雅可比矩阵的行数，12是状态量维度
+			ekfom_data.h.resize(effct_feat_num);//点数对应残差向量的维度
 
 			for (int i = 0; i < effct_feat_num; i++)
 			{
 				V3D point_(laserCloudOri->points[i].x, laserCloudOri->points[i].y, laserCloudOri->points[i].z);
 				M3D point_crossmat;
-				point_crossmat << SKEW_SYM_MATRX(point_);
+				point_crossmat << SKEW_SYM_MATRX(point_);//点转成反对正矩阵
 				V3D point_I_ = x_.offset_R_L_I * point_ + x_.offset_T_L_I;
 				M3D point_I_crossmat;
-				point_I_crossmat << SKEW_SYM_MATRX(point_I_);
+				point_I_crossmat << SKEW_SYM_MATRX(point_I_);//点转成反对正矩阵
 
 				// 得到对应的平面的法向量
 				const PointType &norm_p = corr_normvect->points[i];
@@ -230,7 +230,7 @@ namespace esekfom
 		void update_iterated_dyn_share_modified(double R, PointCloudXYZI::Ptr &feats_down_body,
 												KD_TREE<PointType> &ikdtree, vector<PointVector> &Nearest_Points, int maximum_iter, bool extrinsic_est)
 		{
-			normvec->resize(int(feats_down_body->points.size()));
+			normvec->resize(int(feats_down_body->points.size()));//平面法向量
 
 			dyn_share_datastruct dyn_share;
 			dyn_share.valid = true;
