@@ -189,12 +189,13 @@ namespace esekfom
 				const PointType &norm_p = corr_normvect->points[i];
 				V3D norm_vec(norm_p.x, norm_p.y, norm_p.z);
 
-				// 计算雅可比矩阵H
+				// 计算雅可比矩阵H，是公式的转置
 				V3D C(x_.rot.matrix().transpose() * norm_vec);
 				V3D A(point_I_crossmat * C);
 				if (extrinsic_est)
 				{
 					V3D B(point_crossmat * x_.offset_R_L_I.matrix().transpose() * C);
+					// H按顺序排列：平移、旋转、外参旋转、外参平移、速度、陀螺仪偏置、加速度计偏置、重力向量
 					ekfom_data.h_x.block<1, 12>(i, 0) << norm_p.x, norm_p.y, norm_p.z, VEC_FROM_ARRAY(A), VEC_FROM_ARRAY(B), VEC_FROM_ARRAY(C);
 				}
 				else
@@ -268,7 +269,7 @@ namespace esekfom
 				KH.block<24, 12>(0, 0) = K * H;
 				Matrix<double, 24, 1> dx_ = K * dyn_share.h + (KH - Matrix<double, 24, 24>::Identity()) * dx_new; //公式(18)
 				// std::cout << "dx_: " << dx_.transpose() << std::endl;
-				x_ = boxplus(x_, dx_); //公式(18)
+				x_ = boxplus(x_, dx_); //公式(18)x_就是状态估计数值
 
 				dyn_share.converge = true;
 				for (int j = 0; j < 24; j++)
